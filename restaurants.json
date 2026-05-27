@@ -1,0 +1,32 @@
+[
+    {
+        "id": "restaurant-pasta-palace",
+        "name": "Pasta Palace",
+        "cuisine": "Italian",
+        "ratings": 4.5,
+        "location": "London",
+        "price": 32,
+        "booking": "required",
+        "time_slots": [["2026-06-05T19:00:00", "2026-06-05T21:00:00"], ["2026-06-06T19:00:00", "2026-06-06T21:00:00"]]
+    },
+    {
+        "id": "restaurant-sushi-central",
+        "name": "Sushi Central",
+        "cuisine": "Japanese",
+        "ratings": 4.7,
+        "location": "2 Market Street",
+        "price": 45,
+        "booking": "required",
+        "time_slots": [["2026-06-05T18:00:00", "2026-06-05T20:00:00"], ["2026-06-06T18:00:00", "2026-06-06T20:00:00"]]
+    },
+    {
+        "id": "restaurant-curry-house",
+        "name": "Curry House",
+        "cuisine": "Indian",
+        "ratings": 4.2,
+        "location": "3 Lakeview Avenue",
+        "price": 26,
+        "booking": "available",
+        "time_slots": [["2026-06-05T19:00:00", "2026-06-05T21:00:00"], ["2026-06-06T19:00:00", "2026-06-06T21:00:00"]]
+    }
+]

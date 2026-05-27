@@ -1,0 +1,56 @@
+[
+  {
+    "id": "transport-aero-BA456",
+    "type": "aero",
+    "company": "British Airways",
+    "plane_model": "Boeing 777",
+    "plane_number": "BA456",
+    "departure_location": "Paris Charles de Gaulle",
+    "destination_location": "London Heathrow",
+    "availability": ["2026-06-06T10:45:00", "2026-06-07T20:35:00"],
+    "price": 68,
+    "rating": 4.5,
+    "capacity": 4,
+    "vehicles_available": 3,
+    "booking_required": true
+  },
+  {
+    "id": "transport-london-airport-flight",
+    "name": "London Airport Flight",
+    "type": "private transfer",
+    "departure_location": "London Heathrow",
+    "destination_location": "Paris Charles de Gaulle",
+    "availability": ["2026-06-06T10:45:00", "2026-06-07T20:35:00"],
+    "price": 68,
+    "rating": 4.5,
+    "capacity": 4,
+    "vehicles_available": 3,
+    "booking_required": true
+  },
+  {
+    "id": "transport-paris-metro-pass",
+    "name": "Paris Metro Day Pass",
+    "type": "public transport",
+    "departure_location": "Paris",
+    "destination_location": "Paris",
+    "availability": ["2026-06-05T00:00:00", "2026-06-06T00:00:00", "2026-06-07T00:00:00"],
+    "price": 12,
+    "rating": 4.2,
+    "capacity": 20,
+    "vehicles_available": 20,
+    "booking_required": false
+  },
+  {
+    "id": "transport-rome-airport-train",
+    "name": "Rome Airport Train",
+    "type": "train",
+    "departure_location": "Rome Fiumicino",
+    "destination_location": "Rome Termini",
+    "availability": ["2026-06-05T13:15:00", "2026-06-05T14:15:00"],
+    "price": 18,
+    "rating": 4.1,
+    "capacity": 50,
+    "vehicles_available": 5,
+    "booking_required": false
+  }
+]

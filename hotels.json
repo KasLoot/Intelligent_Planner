@@ -1,0 +1,35 @@
+[
+  {
+    "id": "hotel-left-bank-stay",
+    "name": "Left Bank Stay",
+    "category": "boutique hotel",
+    "location": "Paris Latin Quarter",
+    "price": 165,
+    "rating": 4.6,
+    "rooms_available": 5,
+    "guest_capacity": 2,
+    "booking_required": true
+  },
+  {
+    "id": "hotel-canal-aparthotel",
+    "name": "Canal Aparthotel",
+    "category": "aparthotel",
+    "location": "Paris Canal Saint-Martin",
+    "price": 138,
+    "rating": 4.3,
+    "rooms_available": 3,
+    "guest_capacity": 4,
+    "booking_required": true
+  },
+  {
+    "id": "hotel-rome-central",
+    "name": "Rome Central Rooms",
+    "category": "hotel",
+    "location": "Rome Centro Storico",
+    "price": 152,
+    "rating": 4.4,
+    "rooms_available": 2,
+    "guest_capacity": 2,
+    "booking_required": true
+  }
+]
