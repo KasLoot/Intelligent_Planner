@@ -1,0 +1,98 @@
+[
+    {
+        "type": "function",
+        "name": "get_current_location",
+        "description": "Get the current location of the user.",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+        }
+    },
+    {
+        "type": "function",
+        "name": "get_current_date",
+        "description": "Get the current local date and timezone for resolving relative travel dates.",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+        }
+    },
+    {
+        "type": "function",
+        "name": "resolve_city_transport_nodes",
+        "description": "Find local airport transport nodes for a city from the local IATA database.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "description": "City name, for example London or Paris."
+                }
+            },
+            "required": ["city"],
+            "additionalProperties": false
+        }
+    },
+    {
+        "type": "function",
+        "name": "search_flights",
+        "description": "Search local demo flight candidates between two cities on a concrete travel date.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "origin_city": {
+                    "type": "string",
+                    "description": "Origin city name."
+                },
+                "destination_city": {
+                    "type": "string",
+                    "description": "Destination city name."
+                },
+                "travel_date": {
+                    "type": "string",
+                    "description": "Concrete ISO travel date, for example 2026-05-30."
+                },
+                "max_results": {
+                    "type": "integer",
+                    "description": "Maximum number of candidates to return."
+                }
+            },
+            "required": ["origin_city", "destination_city", "travel_date"],
+            "additionalProperties": false
+        }
+    },
+    {
+        "type": "function",
+        "name": "plan_trip_transport",
+        "description": "Build compact round-trip transport options using concrete ISO dates chosen by the LLM.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "destination_city": {
+                    "type": "string",
+                    "description": "Destination city name."
+                },
+                "outbound_date": {
+                    "type": "string",
+                    "description": "Concrete ISO outbound date chosen by the LLM, for example 2026-05-30."
+                },
+                "return_date": {
+                    "type": "string",
+                    "description": "Concrete ISO return date chosen by the LLM, for example 2026-05-31."
+                },
+                "origin_city": {
+                    "type": "string",
+                    "description": "Optional origin city. If omitted, the user's current location is used."
+                },
+                "max_options": {
+                    "type": "integer",
+                    "description": "Maximum number of round-trip transport options to return."
+                }
+            },
+            "required": ["destination_city", "outbound_date", "return_date"],
+            "additionalProperties": false
+        }
+    }
+]
