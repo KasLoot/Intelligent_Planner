@@ -12,3 +12,5 @@ dist/
 !.env.example
 
 .nested_git_backups/
+
+README1.md
