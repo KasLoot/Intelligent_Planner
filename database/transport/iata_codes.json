@@ -73,6 +73,12 @@
             "country": "China"
         },
         {
+            "iata": "PKX",
+            "name": "Beijing Daxing International Airport",
+            "city": "Beijing",
+            "country": "China"
+        },
+        {
             "iata": "STN",
             "name": "London Stansted Airport",
             "city": "London",

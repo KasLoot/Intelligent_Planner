@@ -1,98 +1,257 @@
 [
-    {
-        "type": "function",
-        "name": "get_current_location",
-        "description": "Get the current location of the user.",
-        "parameters": {
-            "type": "object",
-            "properties": {},
-            "additionalProperties": false
-        }
-    },
-    {
-        "type": "function",
-        "name": "get_current_date",
-        "description": "Get the current local date and timezone for resolving relative travel dates.",
-        "parameters": {
-            "type": "object",
-            "properties": {},
-            "additionalProperties": false
-        }
-    },
-    {
-        "type": "function",
-        "name": "resolve_city_transport_nodes",
-        "description": "Find local airport transport nodes for a city from the local IATA database.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "city": {
-                    "type": "string",
-                    "description": "City name, for example London or Paris."
-                }
-            },
-            "required": ["city"],
-            "additionalProperties": false
-        }
-    },
-    {
-        "type": "function",
-        "name": "search_flights",
-        "description": "Search local demo flight candidates between two cities on a concrete travel date.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "origin_city": {
-                    "type": "string",
-                    "description": "Origin city name."
-                },
-                "destination_city": {
-                    "type": "string",
-                    "description": "Destination city name."
-                },
-                "travel_date": {
-                    "type": "string",
-                    "description": "Concrete ISO travel date, for example 2026-05-30."
-                },
-                "max_results": {
-                    "type": "integer",
-                    "description": "Maximum number of candidates to return."
-                }
-            },
-            "required": ["origin_city", "destination_city", "travel_date"],
-            "additionalProperties": false
-        }
-    },
-    {
-        "type": "function",
-        "name": "plan_trip_transport",
-        "description": "Build compact round-trip transport options using concrete ISO dates chosen by the LLM.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "destination_city": {
-                    "type": "string",
-                    "description": "Destination city name."
-                },
-                "outbound_date": {
-                    "type": "string",
-                    "description": "Concrete ISO outbound date chosen by the LLM, for example 2026-05-30."
-                },
-                "return_date": {
-                    "type": "string",
-                    "description": "Concrete ISO return date chosen by the LLM, for example 2026-05-31."
-                },
-                "origin_city": {
-                    "type": "string",
-                    "description": "Optional origin city. If omitted, the user's current location is used."
-                },
-                "max_options": {
-                    "type": "integer",
-                    "description": "Maximum number of round-trip transport options to return."
-                }
-            },
-            "required": ["destination_city", "outbound_date", "return_date"],
-            "additionalProperties": false
-        }
+  {
+    "type": "function",
+    "name": "get_current_location",
+    "description": "Get the user's approximate current location from the Google Geolocation API. Returns latitude, longitude, and accuracy.",
+    "parameters": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
     }
+  },
+  {
+    "type": "function",
+    "name": "get_time_zone",
+    "description": "Get timezone information for a latitude/longitude at a concrete Unix timestamp.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "description": "Latitude of the location."
+        },
+        "longitude": {
+          "type": "number",
+          "description": "Longitude of the location."
+        },
+        "timestamp": {
+          "type": "integer",
+          "description": "Unix timestamp in seconds for the moment to evaluate, for example 1733428634."
+        }
+      },
+      "required": ["latitude", "longitude", "timestamp"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "get_current_datetime_for_location",
+    "description": "Get the current local date and time for a latitude/longitude by combining the current UTC timestamp with Google timezone data.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "description": "Latitude of the location."
+        },
+        "longitude": {
+          "type": "number",
+          "description": "Longitude of the location."
+        }
+      },
+      "required": ["latitude", "longitude"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "get_lat_lng_from_address",
+    "description": "Geocode a street address or place address into latitude and longitude using the Google Geocoding API.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "Address to geocode, for example '1600 Amphitheatre Parkway, Mountain View, CA'."
+        }
+      },
+      "required": ["address"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "search_by_text",
+    "description": "Search Google Places by free-form text, such as restaurants, hotels, attractions, or a named place.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "text_query": {
+          "type": "string",
+          "description": "Free-form place search query, for example 'Steak in Canary Wharf, London' or 'hotels near UCL East, London'."
+        }
+      },
+      "required": ["text_query"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "search_nearby",
+    "description": "Search Google Places near a latitude/longitude with one or more included place types.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "included_types": {
+          "type": "array",
+          "description": "Google Places types to include, for example ['restaurant'], ['hotel'], or ['tourist_attraction'].",
+          "items": {
+            "type": "string"
+          }
+        },
+        "latitude": {
+          "type": "number",
+          "description": "Center latitude for the nearby search."
+        },
+        "longitude": {
+          "type": "number",
+          "description": "Center longitude for the nearby search."
+        },
+        "radius": {
+          "type": "number",
+          "description": "Search radius in meters."
+        },
+        "max_result_count": {
+          "type": "integer",
+          "description": "Maximum number of places to return."
+        }
+      },
+      "required": ["included_types", "latitude", "longitude"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "compute_route",
+    "description": "Compute route distance, duration, and transit step details where available between an origin and destination using Google Routes. The origin and destination must use the same location_input_type. travel_mode is required. Encoded polylines are intentionally not requested or returned.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "origin": {
+          "description": "Origin location. Use a string for address or place id inputs, or an object with latitude and longitude for lat_lng inputs.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "latitude": {
+                  "type": "number",
+                  "description": "Origin latitude."
+                },
+                "longitude": {
+                  "type": "number",
+                  "description": "Origin longitude."
+                }
+              },
+              "required": ["latitude", "longitude"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "destination": {
+          "description": "Destination location. Use a string for address or place id inputs, or an object with latitude and longitude for lat_lng inputs.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "latitude": {
+                  "type": "number",
+                  "description": "Destination latitude."
+                },
+                "longitude": {
+                  "type": "number",
+                  "description": "Destination longitude."
+                }
+              },
+              "required": ["latitude", "longitude"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "location_input_type": {
+          "type": "string",
+          "description": "How origin and destination are represented.",
+          "enum": ["address", "id", "lat_lng"]
+        },
+        "travel_mode": {
+          "type": "string",
+          "description": "Required travel mode for the route. Use TRANSIT for public transport, WALK for walking legs, and DRIVE for car/taxi routes.",
+          "enum": ["DRIVE", "WALK", "TRANSIT"]
+        },
+        "routing_preference": {
+          "type": "string",
+          "description": "Optional routing preference for DRIVE only. Do not send it for WALK or TRANSIT.",
+          "enum": ["TRAFFIC_AWARE", "TRAFFIC_UNAWARE", "TRAFFIC_AWARE_OPTIMAL"]
+        },
+        "compute_alternative_routes": {
+          "type": "boolean",
+          "description": "Whether to ask Google Routes for alternative routes."
+        },
+        "avoid_tolls": {
+          "type": "boolean",
+          "description": "Whether to avoid toll roads."
+        },
+        "avoid_highways": {
+          "type": "boolean",
+          "description": "Whether to avoid highways."
+        },
+        "avoid_ferries": {
+          "type": "boolean",
+          "description": "Whether to avoid ferries."
+        },
+        "language_code": {
+          "type": "string",
+          "description": "BCP-47 language code for route output, for example en-US."
+        },
+        "units": {
+          "type": "string",
+          "description": "Measurement units for the route response.",
+          "enum": ["METRIC", "IMPERIAL"]
+        },
+        "departure_time": {
+          "type": "string",
+          "description": "Optional RFC3339 departure time, for example 2026-06-06T09:00:00Z. Especially useful for TRANSIT routes. Do not provide this together with arrival_time."
+        },
+        "arrival_time": {
+          "type": "string",
+          "description": "Optional RFC3339 arrival time, for example 2026-06-06T12:00:00Z. Especially useful for TRANSIT routes. Do not provide this together with departure_time."
+        }
+      },
+      "required": ["origin", "destination", "location_input_type", "travel_mode"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "search_flights",
+    "description": "Search local demo flight candidates from database/transport/aero.json between two cities on a concrete travel date. Returns only a bounded filtered subset of matching candidates, never the whole flight database.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "origin_city": {
+          "type": "string",
+          "description": "Origin city name."
+        },
+        "destination_city": {
+          "type": "string",
+          "description": "Destination city name."
+        },
+        "travel_date": {
+          "type": "string",
+          "description": "Concrete ISO travel date, for example 2026-05-30."
+        },
+        "max_results": {
+          "type": "integer",
+          "description": "Maximum number of matching candidates to return. The tool also applies an internal hard cap to protect context size."
+        }
+      },
+      "required": ["origin_city", "destination_city", "travel_date"],
+      "additionalProperties": false
+    }
+  }
 ]
