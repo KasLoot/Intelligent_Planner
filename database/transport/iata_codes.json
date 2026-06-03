@@ -1,0 +1,116 @@
+{
+    "airports": [
+        {
+            "iata": "AMS",
+            "name": "Amsterdam Airport Schiphol",
+            "city": "Amsterdam",
+            "country": "Netherlands"
+        },
+        {
+            "iata": "BCN",
+            "name": "Barcelona-El Prat Airport",
+            "city": "Barcelona",
+            "country": "Spain"
+        },
+        {
+            "iata": "CDG",
+            "name": "Charles de Gaulle Airport",
+            "city": "Paris",
+            "country": "France"
+        },
+        {
+            "iata": "DXB",
+            "name": "Dubai International Airport",
+            "city": "Dubai",
+            "country": "United Arab Emirates"
+        },
+        {
+            "iata": "FCO",
+            "name": "Rome Fiumicino Airport",
+            "city": "Rome",
+            "country": "Italy"
+        },
+        {
+            "iata": "FRA",
+            "name": "Frankfurt Airport",
+            "city": "Frankfurt",
+            "country": "Germany"
+        },
+        {
+            "iata": "JFK",
+            "name": "John F. Kennedy International Airport",
+            "city": "New York",
+            "country": "United States"
+        },
+        {
+            "iata": "LCY",
+            "name": "London City Airport",
+            "city": "London",
+            "country": "United Kingdom"
+        },
+        {
+            "iata": "LGW",
+            "name": "London Gatwick Airport",
+            "city": "London",
+            "country": "United Kingdom"
+        },
+        {
+            "iata": "LHR",
+            "name": "London Heathrow Airport",
+            "city": "London",
+            "country": "United Kingdom"
+        },
+        {
+            "iata": "LTN",
+            "name": "London Luton Airport",
+            "city": "London",
+            "country": "United Kingdom"
+        },
+        {
+            "iata": "PVG",
+            "name": "Shanghai Pudong International Airport",
+            "city": "Shanghai",
+            "country": "China"
+        },
+        {
+            "iata": "PKX",
+            "name": "Beijing Daxing International Airport",
+            "city": "Beijing",
+            "country": "China"
+        },
+        {
+            "iata": "STN",
+            "name": "London Stansted Airport",
+            "city": "London",
+            "country": "United Kingdom"
+        },
+        {
+            "iata": "ZRH",
+            "name": "Zurich Airport",
+            "city": "Zurich",
+            "country": "Switzerland"
+        }
+    ],
+    "airlines": [
+        {
+            "iata": "BA",
+            "name": "British Airways"
+        },
+        {
+            "iata": "EK",
+            "name": "Emirates"
+        },
+        {
+            "iata": "FR",
+            "name": "Ryanair"
+        },
+        {
+            "iata": "LH",
+            "name": "Lufthansa"
+        },
+        {
+            "iata": "U2",
+            "name": "easyJet"
+        }
+    ]
+}
