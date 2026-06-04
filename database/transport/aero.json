@@ -1,0 +1,322 @@
+[
+    {
+        "id": "aero-LHR-CDG-BA123",
+        "departure": "LHR",
+        "arrival": "CDG",
+        "airline": "BA",
+        "flight_number": "BA123",
+        "schedule": [["T08:00:00Z", "T09:30:00Z"], ["T13:00:00Z", "T14:30:00Z"], ["T18:00:00Z", "T19:30:00Z"]],
+        "routine": "daily",
+        "price": 150.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Airbus A320",
+            "baggage_allowance": "23kg",
+            "meal_service": "Included"
+        }
+    },
+    {
+        "id": "aero-CDG-LHR-BA124",
+        "departure": "CDG",
+        "arrival": "LHR",
+        "airline": "BA",
+        "flight_number": "BA124",
+        "schedule": [["T10:30:00Z", "T12:00:00Z"], ["T15:30:00Z", "T17:00:00Z"], ["T20:30:00Z", "T22:00:00Z"]],
+        "routine": "daily",
+        "price": 150.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Airbus A320",
+            "baggage_allowance": "23kg",
+            "meal_service": "Included"
+        }
+    },
+    {
+        "id": "aero-LHR-JFK-BA456",
+        "departure": "LHR",
+        "arrival": "JFK",
+        "airline": "BA",
+        "flight_number": "BA456",
+        "schedule": [["T01:00:00Z", "T09:00:00Z"]],
+        "routine": "daily",
+        "price": 500.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Boeing 777",
+            "baggage_allowance": "23kg",
+            "meal_service": "Included"
+        }
+    },
+    {
+        "id": "aero-JFK-LHR-BA457",
+        "departure": "JFK",
+        "arrival": "LHR",
+        "airline": "BA",
+        "flight_number": "BA457",
+        "schedule": [["T13:00:00Z", "T21:00:00Z"]],
+        "routine": "daily",
+        "price": 500.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Boeing 777",
+            "baggage_allowance": "23kg",
+            "meal_service": "Included"
+        }
+    },
+    {
+        "id": "aero-LHR-FRA-LH789",
+        "departure": "LHR",
+        "arrival": "FRA",
+        "airline": "LH",
+        "flight_number": "LH789",
+        "schedule": [["T09:00:00Z", "T10:30:00Z"], ["T16:00:00Z", "T17:30:00Z"]],
+        "routine": "daily",
+        "price": 120.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Airbus A320",
+            "baggage_allowance": "15kg",
+            "meal_service": "Included"
+        }
+    },
+    {
+        "id": "aero-FRA-LHR-LH790",
+        "departure": "FRA",
+        "arrival": "LHR",
+        "airline": "LH",
+        "flight_number": "LH790",
+        "schedule": [["T12:00:00Z", "T13:30:00Z"], ["T19:00:00Z", "T20:30:00Z"]],
+        "routine": "daily",
+        "price": 120.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Airbus A320",
+            "baggage_allowance": "15kg",
+            "meal_service": "Included"
+        }
+    },
+    {
+        "id": "aero-LHR-PVG-BA169",
+        "departure": "LHR",
+        "arrival": "PVG",
+        "airline": "BA",
+        "flight_number": "BA169",
+        "schedule": [["T09:30:00Z", "T21:50:00Z"]],
+        "routine": "daily",
+        "price": 720.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Boeing 787",
+            "baggage_allowance": "23kg",
+            "meal_service": "Included"
+        }
+    },
+    {
+        "id": "aero-PVG-LHR-BA168",
+        "departure": "PVG",
+        "arrival": "LHR",
+        "airline": "BA",
+        "flight_number": "BA168",
+        "schedule": [["T01:30:00Z", "T14:20:00Z"]],
+        "routine": "daily",
+        "price": 720.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Boeing 787",
+            "baggage_allowance": "23kg",
+            "meal_service": "Included"
+        }
+    },
+    {
+        "id": "aero-LHR-PKX-BA178",
+        "departure": "LHR",
+        "arrival": "PKX",
+        "airline": "BA",
+        "flight_number": "BA178",
+        "schedule": [["T10:00:00Z", "T22:30:00Z"]],
+        "routine": "daily",
+        "price": 700.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Boeing 787",
+            "baggage_allowance": "23kg",
+            "meal_service": "Included"
+        }
+    },
+    {
+        "id": "aero-PKX-LHR-BA177",
+        "departure": "PKX",
+        "arrival": "LHR",
+        "airline": "BA",
+        "flight_number": "BA177",
+        "schedule": [["T02:00:00Z", "T14:30:00Z"]],
+        "routine": "daily",
+        "price": 700.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Boeing 787",
+            "baggage_allowance": "23kg",
+            "meal_service": "Included"
+        }
+    },
+    {
+        "id": "aero-LGW-AMS-U28681",
+        "departure": "LGW",
+        "arrival": "AMS",
+        "airline": "U2",
+        "flight_number": "U28681",
+        "schedule": [["T06:45:00Z", "T08:00:00Z"], ["T15:10:00Z", "T16:25:00Z"]],
+        "routine": "daily",
+        "price": 90.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Airbus A320",
+            "baggage_allowance": "15kg",
+            "meal_service": "Available for purchase"
+        }
+    },
+    {
+        "id": "aero-AMS-LGW-U28682",
+        "departure": "AMS",
+        "arrival": "LGW",
+        "airline": "U2",
+        "flight_number": "U28682",
+        "schedule": [["T09:00:00Z", "T10:15:00Z"], ["T17:25:00Z", "T18:40:00Z"]],
+        "routine": "daily",
+        "price": 90.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Airbus A320",
+            "baggage_allowance": "15kg",
+            "meal_service": "Available for purchase"
+        }
+    },
+    {
+        "id": "aero-STN-FCO-FR3001",
+        "departure": "STN",
+        "arrival": "FCO",
+        "airline": "FR",
+        "flight_number": "FR3001",
+        "schedule": [["T07:20:00Z", "T09:50:00Z"], ["T18:35:00Z", "T21:05:00Z"]],
+        "routine": "daily",
+        "price": 85.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Boeing 737",
+            "baggage_allowance": "10kg cabin bag",
+            "meal_service": "Available for purchase"
+        }
+    },
+    {
+        "id": "aero-FCO-STN-FR3002",
+        "departure": "FCO",
+        "arrival": "STN",
+        "airline": "FR",
+        "flight_number": "FR3002",
+        "schedule": [["T10:45:00Z", "T13:15:00Z"], ["T20:50:00Z", "T23:20:00Z"]],
+        "routine": "daily",
+        "price": 85.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Boeing 737",
+            "baggage_allowance": "10kg cabin bag",
+            "meal_service": "Available for purchase"
+        }
+    },
+    {
+        "id": "aero-LTN-BCN-U22301",
+        "departure": "LTN",
+        "arrival": "BCN",
+        "airline": "U2",
+        "flight_number": "U22301",
+        "schedule": [["T08:05:00Z", "T10:20:00Z"], ["T17:15:00Z", "T19:30:00Z"]],
+        "routine": "daily",
+        "price": 95.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Airbus A320",
+            "baggage_allowance": "15kg",
+            "meal_service": "Available for purchase"
+        }
+    },
+    {
+        "id": "aero-BCN-LTN-U22302",
+        "departure": "BCN",
+        "arrival": "LTN",
+        "airline": "U2",
+        "flight_number": "U22302",
+        "schedule": [["T11:15:00Z", "T13:30:00Z"], ["T20:25:00Z", "T22:40:00Z"]],
+        "routine": "daily",
+        "price": 95.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Airbus A320",
+            "baggage_allowance": "15kg",
+            "meal_service": "Available for purchase"
+        }
+    },
+    {
+        "id": "aero-LCY-ZRH-BA8765",
+        "departure": "LCY",
+        "arrival": "ZRH",
+        "airline": "BA",
+        "flight_number": "BA8765",
+        "schedule": [["T07:50:00Z", "T09:25:00Z"], ["T16:40:00Z", "T18:15:00Z"]],
+        "routine": "weekday",
+        "price": 180.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Embraer E190",
+            "baggage_allowance": "23kg",
+            "meal_service": "Included"
+        }
+    },
+    {
+        "id": "aero-ZRH-LCY-BA8766",
+        "departure": "ZRH",
+        "arrival": "LCY",
+        "airline": "BA",
+        "flight_number": "BA8766",
+        "schedule": [["T10:15:00Z", "T11:50:00Z"], ["T19:00:00Z", "T20:35:00Z"]],
+        "routine": "weekday",
+        "price": 180.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Embraer E190",
+            "baggage_allowance": "23kg",
+            "meal_service": "Included"
+        }
+    },
+    {
+        "id": "aero-LHR-DXB-EK002",
+        "departure": "LHR",
+        "arrival": "DXB",
+        "airline": "EK",
+        "flight_number": "EK002",
+        "schedule": [["T14:20:00Z", "T21:30:00Z"]],
+        "routine": "daily",
+        "price": 430.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Airbus A380",
+            "baggage_allowance": "30kg",
+            "meal_service": "Included"
+        }
+    },
+    {
+        "id": "aero-DXB-LHR-EK001",
+        "departure": "DXB",
+        "arrival": "LHR",
+        "airline": "EK",
+        "flight_number": "EK001",
+        "schedule": [["T07:45:00Z", "T14:55:00Z"]],
+        "routine": "daily",
+        "price": 430.0,
+        "currency": "GBP",
+        "additional_info": {
+            "aircraft": "Airbus A380",
+            "baggage_allowance": "30kg",
+            "meal_service": "Included"
+        }
+    }
+]
