@@ -1,0 +1,74 @@
+[
+    {
+        "id": "rail-Paddington-LHR-HeathrowExpress",
+        "departure": "Paddington",
+        "arrival": "LHR",
+        "train": "Heathrow Express",
+        "schedule": [
+                    ["T05:10:00Z", "T05:25:00Z"],
+                    ["T06:10:00Z", "T06:25:00Z"],
+                    ["T07:10:00Z", "T07:25:00Z"],
+                    ["T08:10:00Z", "T08:25:00Z"],
+                    ["T09:10:00Z", "T09:25:00Z"],
+                    ["T10:10:00Z", "T10:25:00Z"],
+                    ["T11:10:00Z", "T11:25:00Z"],
+                    ["T12:10:00Z", "T12:25:00Z"],
+                    ["T13:10:00Z", "T13:25:00Z"],
+                    ["T14:10:00Z", "T14:25:00Z"],
+                    ["T15:10:00Z", "T15:25:00Z"],
+                    ["T16:10:00Z", "T16:25:00Z"],
+                    ["T17:10:00Z", "T17:25:00Z"],
+                    ["T18:10:00Z", "T18:25:00Z"],
+                    ["T19:10:00Z", "T19:25:00Z"],
+                    ["T20:10:00Z", "T20:25:00Z"],
+                    ["T21:10:00Z", "T21:25:00Z"],
+                    ["T22:10:00Z", "T22:25:00Z"]
+                ],
+        "routine": "daily",
+        "price": 26.0,
+        "currency": "GBP",
+        "additional_info": {
+            "class": "Standard",
+            "ticket_type": "Single",
+            "frequency": "Every 15 minutes",
+            "baggage_allowance": "2 bags",
+            "wifi": "Available"
+        }
+    },
+    {
+        "id": "rail-LHR-Paddington-HeathrowExpress",
+        "departure": "LHR",
+        "arrival": "Paddington",
+        "train": "Heathrow Express",
+        "schedule": [
+                    ["T05:17:00Z", "T05:32:00Z"],
+                    ["T06:17:00Z", "T06:32:00Z"],
+                    ["T07:17:00Z", "T07:32:00Z"],
+                    ["T08:17:00Z", "T08:32:00Z"],
+                    ["T09:17:00Z", "T09:32:00Z"],
+                    ["T10:17:00Z", "T10:32:00Z"],
+                    ["T11:17:00Z", "T11:32:00Z"],
+                    ["T12:17:00Z", "T12:32:00Z"],
+                    ["T13:17:00Z", "T13:32:00Z"],
+                    ["T14:17:00Z", "T14:32:00Z"],
+                    ["T15:17:00Z", "T15:32:00Z"],
+                    ["T16:17:00Z", "T16:32:00Z"],
+                    ["T17:17:00Z", "T17:32:00Z"],
+                    ["T18:17:00Z", "T18:32:00Z"],
+                    ["T19:17:00Z", "T19:32:00Z"],
+                    ["T20:17:00Z", "T20:32:00Z"],
+                    ["T21:17:00Z", "T21:32:00Z"],
+                    ["T22:17:00Z", "T22:32:00Z"]
+                ],
+        "routine": "daily",
+        "price": 26.0,
+        "currency": "GBP",
+        "additional_info": {
+            "class": "Standard",
+            "ticket_type": "Single",
+            "frequency": "Every 15 minutes",
+            "baggage_allowance": "2 bags",
+            "wifi": "Available"
+        }
+    }
+]
