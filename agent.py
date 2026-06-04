@@ -39,6 +39,28 @@ TRIP_EDIT_HINT = (
     "本轮提示: 这是一次编辑/追问。保留用户所选 option 的完整行程覆盖范围；"
     "如果添加航班，也要保留或重新获取住宿、餐饮、POI 和本地交通。"
 )
+RESPONSE_TO_USER_INTERNAL_TERMS = (
+    "search_flights",
+    "compute_route",
+    "get_current_location",
+    "get_lat_lng_from_address",
+    "get_time_zone",
+    "get_current_datetime_for_location",
+    "search_by_text",
+    "search_nearby",
+    "candidate_id",
+    "item_id",
+    "source_tool",
+    "tbd",
+    "api",
+    "json",
+    "字段",
+    "键",
+    "校验",
+    "反馈",
+    "修正",
+    "候选",
+)
 
 
 def load_json(path):
@@ -181,12 +203,40 @@ def validate_final_response_grounding(output_text, trace):
         return None
 
     return (
-        "校验反馈: 草案包含未基于 search_flights 候选结果的航班条目: "
+        "内部校验反馈: 草案包含未基于 search_flights 候选结果的航班条目: "
         f"{', '.join(ungrounded_flights)}。"
         "输出最终 JSON 前，请为每个受支持的去程/返程航段调用 search_flights，"
         "并把返回的 candidate_id 原样用作 item_id。如果没有候选结果，"
         "移除该航班条目，或说明本地 Demo 航班库没有找到对应航班；"
         "不要使用 tbd-flight ID，也不要编造航班细节。"
+        "不要在最终 response_to_user 中提及本反馈、内部工具名或字段名。"
+    )
+
+
+def validate_response_to_user_copy(output_text):
+    try:
+        payload = json.loads(output_text)
+    except json.JSONDecodeError:
+        return None
+
+    response_to_user = payload.get("response_to_user")
+    if not isinstance(response_to_user, str) or not response_to_user.strip():
+        return None
+
+    normalized = response_to_user.casefold()
+    leaked_terms = sorted(
+        term
+        for term in RESPONSE_TO_USER_INTERNAL_TERMS
+        if term.casefold() in normalized
+    )
+    if not leaked_terms:
+        return None
+
+    return (
+        "文案反馈: response_to_user 是直接展示给最终用户的友好总结，"
+        f"不要包含内部实现、字段名、工具名或调试/校验措辞: {', '.join(leaked_terms)}。"
+        "请保留完整 JSON 结构和行程内容，只把 response_to_user 重写为自然、亲切、"
+        "面向旅行体验的中文建议；不要复述本反馈。"
     )
 
 
@@ -245,6 +295,13 @@ def process_agent_turn(runtime, input_list, trace, user_message, turn_number, sh
                     print(colorize(f"\nValidation> {validation_feedback}\n", ANSI_LIGHT_BLUE))
                 input_list.append({"role": "user", "content": validation_feedback})
                 force_next_tool_call = True
+                continue
+            copy_feedback = validate_response_to_user_copy(response.output_text)
+            if copy_feedback:
+                round_trace["copy_feedback"] = copy_feedback
+                if show_tools:
+                    print(colorize(f"\nValidation> {copy_feedback}\n", ANSI_LIGHT_BLUE))
+                input_list.append({"role": "user", "content": copy_feedback})
                 continue
             return response
 

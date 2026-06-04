@@ -45,6 +45,9 @@ class GoogleFirstAgentTests(unittest.TestCase):
         self.assertIn("所有面向用户的自然语言内容必须使用简体中文", prompt)
         self.assertIn("JSON 键名", prompt)
         self.assertIn("只输出原始 JSON", prompt)
+        self.assertIn("response_to_user 必须像友好的旅行助理", prompt)
+        self.assertIn("response_to_user 禁止提及内部实现", prompt)
+        self.assertIn("不要说“已按反馈修正”", prompt)
         self.assertIn("get_lat_lng_from_address", prompt)
         self.assertIn("compute_route", prompt)
         self.assertIn("search_flights", prompt)
@@ -677,7 +680,7 @@ class GoogleFirstAgentTests(unittest.TestCase):
         self.assertIn("aero-LHR-PKX-BA178#0", response.output_text)
         self.assertEqual(len(responses.requests), 3)
         self.assertIn("validation_feedback", trace["rounds"][0])
-        self.assertIn("校验反馈", trace["rounds"][0]["validation_feedback"])
+        self.assertIn("内部校验反馈", trace["rounds"][0]["validation_feedback"])
         self.assertEqual(responses.requests[1]["tool_choice"], "required")
         call_tool.assert_called_once_with(
             "search_flights",
@@ -687,6 +690,79 @@ class GoogleFirstAgentTests(unittest.TestCase):
                 "travel_date": "2026-06-08",
             },
         )
+
+    def test_response_to_user_internal_terms_force_copy_retry(self):
+        class FakeMessage:
+            type = "message"
+
+            def model_dump(self, mode="json"):
+                return {"type": self.type, "content": []}
+
+        class FakeResponse:
+            def __init__(self, output_text):
+                self.output = [FakeMessage()]
+                self.output_text = output_text
+
+            def model_dump(self, mode="json"):
+                return {"output": [item.model_dump(mode=mode) for item in self.output]}
+
+        class FakeResponses:
+            def __init__(self):
+                self.requests = []
+                self.responses = [
+                    FakeResponse(
+                        json.dumps(
+                            {
+                                "assumptions": [],
+                                "plan_options": [],
+                                "response_to_user": (
+                                    "已按反馈修正：所有航班条目都来自 search_flights，"
+                                    "item_id 与 candidate_id 一致。"
+                                ),
+                            },
+                            ensure_ascii=False,
+                        )
+                    ),
+                    FakeResponse(
+                        json.dumps(
+                            {
+                                "assumptions": [],
+                                "plan_options": [],
+                                "response_to_user": (
+                                    "我给你整理好了两条更稳妥的路线：北京线更适合经典文化体验，"
+                                    "上海线更适合城市风景和轻松逛吃。"
+                                ),
+                            },
+                            ensure_ascii=False,
+                        )
+                    ),
+                ]
+
+            def create(self, **kwargs):
+                self.requests.append(kwargs)
+                return self.responses.pop(0)
+
+        responses = FakeResponses()
+        runtime = {
+            "client": SimpleNamespace(responses=responses),
+            "available_tools": [],
+            "instructions": "base instructions",
+        }
+        trace = {"rounds": []}
+        input_list = []
+
+        response = agent.process_agent_turn(
+            runtime,
+            input_list,
+            trace,
+            "Plan a week trip to China",
+            1,
+        )
+
+        self.assertEqual(len(responses.requests), 2)
+        self.assertIn("copy_feedback", trace["rounds"][0])
+        self.assertIn("不要包含内部实现", trace["rounds"][0]["copy_feedback"])
+        self.assertIn("我给你整理好了两条更稳妥的路线", response.output_text)
 
 
 if __name__ == "__main__":
