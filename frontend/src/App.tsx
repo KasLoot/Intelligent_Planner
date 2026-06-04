@@ -8,7 +8,6 @@ import {
   hasRenderablePlan,
   isAgentTravelResponse,
 } from './types/travel';
-import AgentThinking from './components/chat/AgentThinking';
 import TravelPlanCard from './components/travel/TravelPlanCard';
 import ActionMenu from './components/travel/ActionMenu';
 import POIDetail from './components/travel/POIDetail';
@@ -189,12 +188,6 @@ export default function App() {
     setSelectedItem(null);
   };
 
-  const handleThinkingComplete = (msgId: string) => {
-    setMessages((prev) =>
-      prev.map((message) => (message.id === msgId ? { ...message, status: 'done' } : message)),
-    );
-  };
-
   const send = async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
@@ -221,7 +214,7 @@ export default function App() {
             content: getAgentResponseText(structured),
             structured,
             id: agentId,
-            status: 'thinking',
+            status: 'done',
           },
         ]);
         setLoading(false);
@@ -386,10 +379,7 @@ export default function App() {
                     >
                       {isStructuredMsg ? (
                         <div className="w-full">
-                          {message.status === 'thinking' && (
-                            <AgentThinking onComplete={() => handleThinkingComplete(message.id)} />
-                          )}
-                          {message.status === 'done' && message.structured && (
+                          {message.structured && (
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="w-full">
                               <TravelPlanCard
                                 plan={message.structured}

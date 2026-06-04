@@ -54,6 +54,7 @@ CITY_ALIASES = {
     "苏黎世": "Zurich",
     "迪拜": "Dubai",
 }
+CITY_NAME_ZH = {v: k for k, v in CITY_ALIASES.items()}
 CHINESE_DAY_NUMBERS = {
     "一": 1,
     "两": 2,

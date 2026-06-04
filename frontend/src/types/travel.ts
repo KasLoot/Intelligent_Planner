@@ -46,6 +46,8 @@ export interface AgentTravelResponse {
   plan_options: PlanOption[];
   response_to_user: string;
   trip_summary?: string;
+  origin_city?: string;
+  destination_city?: string;
 }
 
 export type TravelPlan = AgentTravelResponse;

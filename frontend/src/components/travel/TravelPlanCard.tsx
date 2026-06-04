@@ -55,6 +55,9 @@ export default function TravelPlanCard({
 
   const useGenericLabels = useMemo(() => areDatesGeneric(days), [days]);
 
+  const cnNumbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十',
+    '十一', '十二', '十三', '十四', '十五'];
+
   const dateLabels = useMemo(
     () => days.map((day, index) =>
       useGenericLabels ? `D${index + 1}` : formatDateLabel(day.date),
@@ -64,12 +67,20 @@ export default function TravelPlanCard({
 
   const dayTitles = useMemo(
     () => days.map((day, index) =>
-      useGenericLabels ? `Day ${index + 1}` : day.title,
+      useGenericLabels ? `第${cnNumbers[index] ?? index + 1}天` : day.title,
     ),
     [days, useGenericLabels],
   );
 
   const currentDay = days[selectedDay];
+
+  const planTitle = useMemo(() => {
+    const origin = plan.origin_city;
+    const dest = plan.destination_city;
+    if (origin && dest) return `${origin} → ${dest} 行程方案`;
+    if (dest) return `${dest} 行程方案`;
+    return '行程方案';
+  }, [plan.origin_city, plan.destination_city]);
 
   const handleSave = () => {
     setSaved(true);
@@ -90,7 +101,7 @@ export default function TravelPlanCard({
     >
       <div className="px-1 mb-3">
         <h2 className="text-[18px] font-bold text-zinc-900 tracking-tight">
-          行程方案
+          {planTitle}
         </h2>
         <div className="flex flex-wrap gap-3 mt-1">
           <span className="text-zinc-900 text-xs">{plan.plan_options.length} 个方案</span>

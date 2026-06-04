@@ -48,7 +48,29 @@ def handle_message(message: str) -> dict[str, Any]:
     agent_message = build_agent_message_with_fixed_flights(message, fixed_flights)
     response = run_agent(agent_message)
     payload = _parse_agent_output(response.output_text)
-    return apply_fixed_flights_to_payload(payload, fixed_flights)
+    result = apply_fixed_flights_to_payload(payload, fixed_flights)
+
+    # Inject origin/destination city for frontend title display
+    if fixed_flights:
+        result["origin_city"] = fixed_flights.get("origin_city", "")
+        result["destination_city"] = fixed_flights.get("destination_city", "")
+    else:
+        from agent import _extract_city_mentions
+        cities = _extract_city_mentions(message)
+        if len(cities) >= 2:
+            result["origin_city"] = cities[0]
+            result["destination_city"] = cities[1]
+        elif len(cities) == 1:
+            result["destination_city"] = cities[0]
+
+    # Convert English city names to Chinese where available
+    from agent import CITY_NAME_ZH
+    for key in ("origin_city", "destination_city"):
+        city = result.get(key, "")
+        if city and city in CITY_NAME_ZH:
+            result[key] = CITY_NAME_ZH[city]
+
+    return result
 
 
 class AgentHandler(BaseHTTPRequestHandler):
