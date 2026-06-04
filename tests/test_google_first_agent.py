@@ -29,7 +29,7 @@ class GoogleFirstAgentTests(unittest.TestCase):
         self.assertEqual(configured, tools.get_available_tool_names())
 
     def test_system_prompt_uses_current_google_first_tools(self):
-        prompt = Path("configs/system_prompt.md").read_text(encoding="utf-8")
+        prompt = Path(agent.SYSTEM_PROMPT_PATH).read_text(encoding="utf-8")
         self.assertLessEqual(len(prompt.splitlines()), 90)
         stale_tool_names = [
             "get_current_date",
@@ -42,6 +42,9 @@ class GoogleFirstAgentTests(unittest.TestCase):
             self.assertIsNone(re.search(rf"\b{re.escape(name)}\b", prompt))
 
         self.assertIn('"plan_options": []', prompt)
+        self.assertIn("所有面向用户的自然语言内容必须使用简体中文", prompt)
+        self.assertIn("JSON 键名", prompt)
+        self.assertIn("只输出原始 JSON", prompt)
         self.assertIn("get_lat_lng_from_address", prompt)
         self.assertIn("compute_route", prompt)
         self.assertIn("search_flights", prompt)
@@ -51,25 +54,25 @@ class GoogleFirstAgentTests(unittest.TestCase):
         self.assertIn("set item_id to candidate_id exactly", prompt)
         self.assertIn("China demo cities include Beijing and Shanghai", prompt)
         self.assertIn("Flight search alone is not a complete trip update", prompt)
-        self.assertIn("Do not ask \"which weekend\" until tool resolution fails", prompt)
-        self.assertIn("assume the user's current location", prompt)
+        self.assertIn("不要询问 \"which weekend\"", prompt)
+        self.assertIn("默认使用用户当前位置", prompt)
         self.assertIn('"response_to_user"', prompt)
         self.assertIn('"plan_summary"', prompt)
-        self.assertIn("Produce exactly 3 plan options", prompt)
-        self.assertIn("Option 1 is always the most recommended", prompt)
-        self.assertIn("Sort plan days by date ascending", prompt)
-        self.assertIn("day items by start_time", prompt)
-        self.assertIn("Use \"response_to_user\"; do not use \"trip_summary\"", prompt)
-        self.assertIn("Draft first, then let the user refine", prompt)
-        self.assertIn("Do not ask preference questions before the first draft", prompt)
+        self.assertIn("正好产出 3 个 plan options", prompt)
+        self.assertIn("Option 1 永远是最推荐方案", prompt)
+        self.assertIn("行程天数按日期升序排序", prompt)
+        self.assertIn("每天 items 按 start_time 排序", prompt)
+        self.assertIn('Use "response_to_user"; do not use "trip_summary"', prompt)
+        self.assertIn("先给草案，再让用户细化", prompt)
+        self.assertIn("第一版草案前不要询问偏好问题", prompt)
         self.assertIn("preserve the rest of that option", prompt)
         self.assertIn("One-night stay means two calendar days", prompt)
         self.assertIn("priceAmount, priceCurrency, and priceDescription", prompt)
         self.assertIn("Use priceAmount, priceCurrency, and priceDescription when returned", prompt)
-        self.assertIn("travel_mode is required", prompt)
-        self.assertIn("TRANSIT for public transport", prompt)
-        self.assertIn("include departure_time or arrival_time", prompt)
-        self.assertIn("Complete plan checklist", prompt)
+        self.assertIn("travel_mode 是必填项", prompt)
+        self.assertIn("公共交通用 TRANSIT", prompt)
+        self.assertIn("尽量包含 departure_time 或 arrival_time", prompt)
+        self.assertIn("完整行程清单", prompt)
         self.assertIn("outbound/return transport", prompt)
         self.assertIn("hotel/lodging", prompt)
         self.assertIn("restaurants/food", prompt)
@@ -493,9 +496,9 @@ class GoogleFirstAgentTests(unittest.TestCase):
 
         self.assertEqual(responses.requests[0]["tool_choice"], "required")
         self.assertEqual(trace["rounds"][0]["request"]["tool_choice"], "required")
-        self.assertIn("resolve relative dates with location/time tools", responses.requests[0]["instructions"])
-        self.assertIn("call get_current_location", responses.requests[0]["instructions"])
-        self.assertIn("draft with sensible defaults", responses.requests[0]["instructions"])
+        self.assertIn("先用位置/时间工具解析相对日期", responses.requests[0]["instructions"])
+        self.assertIn("调用 get_current_location", responses.requests[0]["instructions"])
+        self.assertIn("基于合理默认值起草", responses.requests[0]["instructions"])
 
     def test_option_flight_followup_preserves_full_trip_context(self):
         class FakeItem:
@@ -537,8 +540,8 @@ class GoogleFirstAgentTests(unittest.TestCase):
         )
 
         instructions = responses.requests[0]["instructions"]
-        self.assertIn("Preserve the chosen option's full trip coverage", instructions)
-        self.assertIn("keep or retrieve lodging, food, POIs, and local transport", instructions)
+        self.assertIn("保留用户所选 option 的完整行程覆盖范围", instructions)
+        self.assertIn("保留或重新获取住宿、餐饮、POI 和本地交通", instructions)
 
     def test_ungrounded_flight_draft_forces_search_flights_retry(self):
         class FakeMessage:
@@ -674,6 +677,7 @@ class GoogleFirstAgentTests(unittest.TestCase):
         self.assertIn("aero-LHR-PKX-BA178#0", response.output_text)
         self.assertEqual(len(responses.requests), 3)
         self.assertIn("validation_feedback", trace["rounds"][0])
+        self.assertIn("校验反馈", trace["rounds"][0]["validation_feedback"])
         self.assertEqual(responses.requests[1]["tool_choice"], "required")
         call_tool.assert_called_once_with(
             "search_flights",

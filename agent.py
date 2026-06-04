@@ -5,6 +5,7 @@ from tools import call_tool, get_available_tool_names
 
 
 MODEL = "gpt-5.4-mini"
+SYSTEM_PROMPT_PATH = "configs/system_prompt_zh.md"
 MAX_TOOL_ROUNDS = 20
 DEFAULT_TRACE_PATH = "agent_debug_trace.json"
 ANSI_RESET = "\033[0m"
@@ -31,12 +32,12 @@ TRIP_EDIT_PHRASES = (
     "add flights",
 )
 CURRENT_LOCATION_ORIGIN_HINT = (
-    "Turn hint: resolve relative dates with location/time tools before final JSON. "
-    "If origin is omitted, call get_current_location and draft with sensible defaults."
+    "本轮提示: 在输出最终 JSON 前，先用位置/时间工具解析相对日期。"
+    "如果用户省略出发地，调用 get_current_location，并基于合理默认值起草。"
 )
 TRIP_EDIT_HINT = (
-    "Turn hint: this is an edit/follow-up. Preserve the chosen option's full trip "
-    "coverage; if adding flights, keep or retrieve lodging, food, POIs, and local transport too."
+    "本轮提示: 这是一次编辑/追问。保留用户所选 option 的完整行程覆盖范围；"
+    "如果添加航班，也要保留或重新获取住宿、餐饮、POI 和本地交通。"
 )
 
 
@@ -180,12 +181,12 @@ def validate_final_response_grounding(output_text, trace):
         return None
 
     return (
-        "Validation feedback: the draft contains flight items that are not grounded "
-        f"in search_flights candidates: {', '.join(ungrounded_flights)}. "
-        "Before final JSON, call search_flights for each supported outbound/return "
-        "flight leg and use the returned candidate_id exactly as item_id. If no "
-        "candidate exists, remove the flight item or state that no local demo flight "
-        "was found; do not use tbd-flight IDs or invented flight details."
+        "校验反馈: 草案包含未基于 search_flights 候选结果的航班条目: "
+        f"{', '.join(ungrounded_flights)}。"
+        "输出最终 JSON 前，请为每个受支持的去程/返程航段调用 search_flights，"
+        "并把返回的 candidate_id 原样用作 item_id。如果没有候选结果，"
+        "移除该航班条目，或说明本地 Demo 航班库没有找到对应航班；"
+        "不要使用 tbd-flight ID，也不要编造航班细节。"
     )
 
 
@@ -197,7 +198,7 @@ def create_agent_runtime():
     return {
         "client": OpenAI(),
         "available_tools": available_tools,
-        "instructions": load_text("configs/system_prompt.md"),
+        "instructions": load_text(SYSTEM_PROMPT_PATH),
     }
 
 
