@@ -7,7 +7,7 @@ interface TravelPlanCardProps {
   plan: AgentTravelResponse;
   onActionMenu?: (item: PlanItem, itemIndex: number, dayIndex: number) => void;
   onItemTap?: (item: PlanItem) => void;
-  onSavePlan?: () => void;
+  onSavePlan?: (plan: AgentTravelResponse) => void;
   onReplan?: () => void;
   onNavigate?: () => void;
 }
@@ -17,27 +17,6 @@ function formatDateLabel(dateValue: string): string {
   if (month && day) return `${Number(month)}.${Number(day)}`;
   return dateValue;
 }
-
-function isTodayOrTomorrow(dateStr: string): boolean {
-  const d = new Date(dateStr + 'T00:00:00');
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diffDays = Math.round((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  return diffDays === 0 || diffDays === 1;
-}
-
-function areDatesGeneric(days: { date: string }[]): boolean {
-  if (days.length === 0) return true;
-  if (!isTodayOrTomorrow(days[0].date)) return false;
-  for (let i = 1; i < days.length; i++) {
-    const prev = new Date(days[i - 1].date + 'T00:00:00');
-    const curr = new Date(days[i].date + 'T00:00:00');
-    const diff = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
-    if (diff !== 1) return false;
-  }
-  return true;
-}
-
 
 export default function TravelPlanCard({
   plan,
@@ -53,23 +32,14 @@ export default function TravelPlanCard({
   const currentOption = plan.plan_options[selectedOption];
   const days = currentOption?.plan ?? [];
 
-  const useGenericLabels = useMemo(() => areDatesGeneric(days), [days]);
-
-  const cnNumbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十',
-    '十一', '十二', '十三', '十四', '十五'];
-
   const dateLabels = useMemo(
-    () => days.map((day, index) =>
-      useGenericLabels ? `D${index + 1}` : formatDateLabel(day.date),
-    ),
-    [days, useGenericLabels],
+    () => days.map((day) => formatDateLabel(day.date)),
+    [days],
   );
 
   const dayTitles = useMemo(
-    () => days.map((day, index) =>
-      useGenericLabels ? `第${cnNumbers[index] ?? index + 1}天` : day.title,
-    ),
-    [days, useGenericLabels],
+    () => days.map((day) => day.title),
+    [days],
   );
 
   const currentDay = days[selectedDay];
@@ -84,7 +54,7 @@ export default function TravelPlanCard({
 
   const handleSave = () => {
     setSaved(true);
-    onSavePlan?.();
+    onSavePlan?.(plan);
   };
 
   const handleReplan = () => {

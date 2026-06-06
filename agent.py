@@ -42,6 +42,24 @@ TRIP_EDIT_HINT = (
     "本轮提示: 这是一次编辑/追问。保留用户所选 option 的完整行程覆盖范围；"
     "如果添加航班，也要保留或重新获取住宿、餐饮、POI 和本地交通。"
 )
+CORE_TRAVEL_EXPERT_CONSTRAINTS = """
+
+最新业务约束:
+- 你是一名专业的 AI 智能行程规划专家，根据用户输入和实时状态生成、微调和管理个性化旅游行程。
+- 在正式生成行程前，必须先明确锁定出发地、目的地、旅游长度/天数。若任一信息缺失，只返回中文追问 JSON，不要生成草案。
+- 所有面向用户展示内容必须完全使用中文；航班编号、机场代码、货币代码、ISO 时间和 JSON 键名可保持原格式。
+- 行程保持精炼，只保留航班、酒店、餐厅、景点/活动，以及机场到酒店/目的地、返程去机场的市内短途交通。
+- 完整过夜行程必须安排餐厅；不要在 assumptions、plan_summary 或 response_to_user 中说“不包含餐厅”。
+- 午餐时间为 11:00-14:00，晚餐时间为 17:00-20:00。正常情况下每个午餐、晚餐时段都必须安排一个 restaurant item，用餐时间约 1 小时。
+- 如果午餐或晚餐时段被航班占用，或被前往机场/返程去机场的交通占用，该餐可以不安排；其他情况必须安排。
+- 餐厅只能安排在 11:00-14:00 或 17:00-20:00 内。若饭点因航班或机场接驳错过，不要补排深夜、凌晨或错峰餐厅。
+- 如果用户没有说明具体行程日期，使用真实当前日期的下一天作为第一天；例如当前日期为 2026-06-06 且用户要 3 天游，则日期为 2026-06-07 至 2026-06-09。
+- 如果用户给出日期或日期区间，严格按用户指定日期生成；例如 6.9-6.14 表示第一天 6.9，最后一天 6.14。
+- 严禁包含景点之间、酒店与景点之间的城市公交、地铁换乘等市内公共交通。
+- 每天最多安排 3 个景点/活动。可以没有景点；如果第一天到达太晚，安排航班、必要接驳和入住酒店即可。
+- 去程航班必须是第一天第一个 item，回程航班必须是最后一天最后一个 item。
+- 用户确认行程或系统要求 Recovery 行程时，严格输出可解析 JSON 对象，并尽量减少文字。
+"""
 RESPONSE_TO_USER_INTERNAL_TERMS = (
     "search_flights",
     "compute_route",
@@ -197,10 +215,11 @@ def _extract_start_date(user_message):
     if short_match:
         year = datetime.now().year
         return date(year, int(short_match.group(1)), int(short_match.group(2)))
-    return datetime.now().date()
+    return datetime.now().date() + timedelta(days=1)
 
 
 def _flight_item_from_candidate(candidate, direction):
+    direction_label = "去程" if direction == "outbound" else "回程"
     return {
         "start_time": candidate["departure_at"],
         "end_time": candidate["arrival_at"],
@@ -215,8 +234,7 @@ def _flight_item_from_candidate(candidate, direction):
         "currency": candidate.get("currency"),
         "booking_required": True,
         "notes": (
-            f"Fixed {direction} flight selected from local database/transport/aero.json. "
-            "The model should not replace or re-query this flight."
+            f"已为本次{direction_label}行程锁定航班，后续安排会围绕该航班时间展开。"
         ),
         "details": {
             "candidate_id": candidate["candidate_id"],
@@ -347,8 +365,7 @@ def apply_fixed_flights_to_payload(payload, fixed_flights):
 
     assumptions = payload.setdefault("assumptions", [])
     fixed_note = (
-        "Flights were fixed by the backend from local database/transport/aero.json; "
-        "other itinerary details were planned by the agent."
+        "航班已按可用候选锁定，其余行程围绕航班时间安排。"
     )
     if fixed_note not in assumptions:
         assumptions.append(fixed_note)
@@ -439,9 +456,8 @@ def build_turn_instructions(base_instructions, user_message):
         hints.append(CURRENT_LOCATION_ORIGIN_HINT)
     if needs_trip_edit_context(user_message):
         hints.append(TRIP_EDIT_HINT)
-    if not hints:
-        return base_instructions
-    return f"{base_instructions}\n\n" + "\n\n".join(hints)
+    all_hints = [CORE_TRAVEL_EXPERT_CONSTRAINTS, *hints]
+    return f"{base_instructions}\n\n" + "\n\n".join(all_hints)
 
 
 def _iter_plan_items(plan_payload):
@@ -477,6 +493,97 @@ def _has_return_leg(items):
     )
 
 
+def _minutes_from_time_value(value):
+    if not value:
+        return None
+    text = str(value)
+    match = re.search(r"(?:T|\b)(\d{1,2}):(\d{2})", text)
+    if not match:
+        return None
+    hour = int(match.group(1))
+    minute = int(match.group(2))
+    if hour > 23 or minute > 59:
+        return None
+    return hour * 60 + minute
+
+
+def _item_time_range(item):
+    start = _minutes_from_time_value(item.get("start_time") or item.get("time"))
+    end = _minutes_from_time_value(item.get("end_time"))
+    if start is None:
+        return None
+    if end is None:
+        end = start + 60
+    return start, end
+
+
+def _ranges_overlap(first_start, first_end, second_start, second_end):
+    return first_start < second_end and second_start < first_end
+
+
+def _covers_meal_window(item, window_start, window_end):
+    item_range = _item_time_range(item)
+    if not item_range:
+        return False
+    start, end = item_range
+    return _ranges_overlap(start, end, window_start, window_end)
+
+
+def _is_airport_bound_transport(item):
+    if item.get("domain") != "transport":
+        return False
+    text = _item_text(item)
+    airport_terms = ("airport", "机场", "航站", "terminal", "lhr", "cdg", "pvg", "pek", "pkx", "sha")
+    airport_action_terms = (
+        "去机场",
+        "到机场",
+        "回机场",
+        "前往机场",
+        "返程",
+        "登机",
+        "候机",
+        "to airport",
+        "to cdg",
+        "to lhr",
+    )
+    return any(term in text for term in airport_terms) and (
+        any(term in text for term in airport_action_terms)
+        or "destination" in text
+        or "回" in text
+    )
+
+
+def _meal_window_is_exempt(items, window_start, window_end):
+    for item in items:
+        if not _covers_meal_window(item, window_start, window_end):
+            continue
+        if item.get("domain") == "flight":
+            return True
+        if _is_airport_bound_transport(item):
+            return True
+    return False
+
+
+def _meal_window_has_restaurant(items, window_start, window_end):
+    return any(
+        item.get("domain") == "restaurant"
+        and _covers_meal_window(item, window_start, window_end)
+        for item in items
+    )
+
+
+def _restaurant_is_in_allowed_meal_window(item):
+    item_range = _item_time_range(item)
+    if not item_range:
+        return False
+    start, end = item_range
+    meal_windows = (
+        (11 * 60, 14 * 60),
+        (17 * 60, 20 * 60),
+    )
+    return any(_ranges_overlap(start, end, window_start, window_end) for window_start, window_end in meal_windows)
+
+
 def _search_flight_candidate_ids(trace):
     candidate_ids = set()
     for round_trace in trace.get("rounds", []):
@@ -488,6 +595,18 @@ def _search_flight_candidate_ids(trace):
                 if candidate_id:
                     candidate_ids.add(candidate_id)
     return candidate_ids
+
+
+def _is_fixed_local_aero_item(item_id, details):
+    return (
+        isinstance(item_id, str)
+        and item_id.startswith("aero-")
+        and (
+            details.get("source_tool") in {"local_aero_json", "search_flights"}
+            or details.get("candidate_id") == item_id
+            or details.get("flight_id", "").startswith("aero-")
+        )
+    )
 
 
 def validate_final_response_grounding(output_text, trace):
@@ -505,6 +624,8 @@ def validate_final_response_grounding(output_text, trace):
         item_id = item.get("item_id") or ""
         details = item.get("details") or {}
         if details.get("source_tool") == "local_aero_json" and details.get("fixed_by_backend"):
+            continue
+        if _is_fixed_local_aero_item(item_id, details):
             continue
         if item_id.startswith("tbd-") or details.get("source_tool") != "search_flights":
             ungrounded_flights.append(item_id or item.get("name") or "unnamed flight")
@@ -532,7 +653,14 @@ def validate_final_response_completeness(output_text):
         return None
 
     problems = []
-    for option in payload.get("plan_options", []) or []:
+    if "plan_options" not in payload:
+        return None
+
+    plan_options = payload.get("plan_options", []) or []
+    if not plan_options:
+        problems.append("no plan options were produced")
+
+    for option in plan_options:
         option_number = option.get("plan_option_number", "?")
         days = option.get("plan", []) or []
         if len(days) < 2:
@@ -548,6 +676,32 @@ def validate_final_response_completeness(output_text):
             for domain in ("hotel", "restaurant", "entertainment", "transport")
             if not _has_domain(items, domain)
         ]
+        for day_index, day in enumerate(days, start=1):
+            day_items = day.get("items", []) or []
+            attractions = [
+                item for item in day_items
+                if item.get("domain") == "entertainment"
+            ]
+            if len(attractions) > 3:
+                problems.append(
+                    f"option {option_number} day {day_index} has more than 3 attractions"
+                )
+            for item in day_items:
+                if item.get("domain") == "restaurant" and not _restaurant_is_in_allowed_meal_window(item):
+                    problems.append(
+                        f"option {option_number} day {day_index} has restaurant outside lunch/dinner windows"
+                    )
+            meal_windows = (
+                ("lunch", 11 * 60, 14 * 60),
+                ("dinner", 17 * 60, 20 * 60),
+            )
+            for meal_name, window_start, window_end in meal_windows:
+                if _meal_window_is_exempt(day_items, window_start, window_end):
+                    continue
+                if not _meal_window_has_restaurant(day_items, window_start, window_end):
+                    problems.append(
+                        f"option {option_number} day {day_index} is missing {meal_name} restaurant"
+                    )
         if missing_domains:
             problems.append(
                 f"option {option_number} is missing required domains: {', '.join(missing_domains)}"
@@ -555,7 +709,7 @@ def validate_final_response_completeness(output_text):
         first_day_items = days[0].get("items", []) or []
         if len(first_day_items) < 2 or {_item.get("domain") for _item in first_day_items} <= {"flight"}:
             problems.append(
-                f"option {option_number} first day only has arrival/flight information; add arrival transfer, hotel check-in, and a light meal or nearby activity"
+                f"option {option_number} first day only has arrival/flight information; add airport transfer and hotel check-in"
             )
 
     if not problems:
@@ -565,8 +719,10 @@ def validate_final_response_completeness(output_text):
         "Validation feedback: the itinerary is incomplete. "
         + "; ".join(problems)
         + ". Before final JSON, repair every plan option so each multi-day non-local trip includes "
-        "outbound transport, arrival/local transfer, hotel/lodging, restaurants/food, activities/POIs, "
-        "and local transport between key stops. "
+        "outbound/return flights, airport transfer, hotel/lodging, restaurants/food, and up to 3 activities/POIs per day. "
+        "Add restaurant meals around 11:00-14:00 for lunch and 17:00-20:00 for dinner, about 1 hour each, unless that meal window overlaps a flight or airport-bound transfer. "
+        "Do not add late-night, early-morning, or off-window restaurants to compensate for a missed meal. "
+        "Remove city transit between attractions. "
         "Use available tools for real candidates when possible. "
         "The backend will inject fixed outbound and return flights from local aero.json."
     )

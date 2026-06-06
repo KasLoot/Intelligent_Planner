@@ -31,10 +31,18 @@ function uid(): string {
 function parseAgentPayload(text: string): AgentTravelResponse | null {
   try {
     const parsed = JSON.parse(text);
-    if (isAgentTravelResponse(parsed)) return parsed;
+    if (isAgentTravelResponse(parsed)) {
+      if (hasRenderablePlan(parsed)) return parsed;
+      const nestedText = parsed.response_to_user ?? parsed.trip_summary;
+      if (typeof nestedText === 'string' && nestedText.includes('plan_options')) {
+        const nested = parseAgentPayload(nestedText);
+        if (nested) return nested;
+      }
+      return parsed;
+    }
     if (parsed.__structured && isAgentTravelResponse(parsed.data)) return parsed.data;
 
-    const wrapped = parsed.reply ?? parsed.message ?? parsed.content;
+    const wrapped = parsed.reply ?? parsed.message ?? parsed.content ?? parsed.response_to_user;
     if (typeof wrapped === 'string') return parseAgentPayload(wrapped);
     if (isAgentTravelResponse(wrapped)) return wrapped;
   } catch {
@@ -43,12 +51,12 @@ function parseAgentPayload(text: string): AgentTravelResponse | null {
   return null;
 }
 
-async function callAgentAPI(message: string): Promise<string> {
+async function callAgentAPI(message: string, sessionId: string, extraPayload: Record<string, unknown> = {}): Promise<string> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/agent/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, timestamp: Date.now() }),
+      body: JSON.stringify({ message, session_id: sessionId, timestamp: Date.now(), ...extraPayload }),
     });
 
     if (!response.ok) {
@@ -95,6 +103,7 @@ export default function App() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const greetingSent = useRef(false);
+  const sessionIdRef = useRef(uid());
 
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -125,7 +134,7 @@ export default function App() {
 
     const greetingText = isReplanFlow
       ? '你好，我是小团☺️\n识别到你可能需要重新规划行程，可以直接告诉我航班延误、取消或想调整的内容。'
-      : '你好！我是小团☺️\n听说你想规划行程～\n请告诉我你的目的地、出行天数、预算和游玩偏好，我来帮你定制专属旅行计划！';
+      : '你好！我是小团☺️\n听说你想规划行程～\n请告诉我你的出发地、目的地和出行天数，我来帮你定制专属旅行计划！';
     const msgId = uid();
 
     const timer = setTimeout(async () => {
@@ -202,7 +211,7 @@ export default function App() {
     setLoading(true);
 
     try {
-      const replyText = await callAgentAPI(actualContent);
+      const replyText = await callAgentAPI(actualContent, sessionIdRef.current);
       const agentId = uid();
       const structured = parseAgentPayload(replyText);
 
@@ -270,19 +279,22 @@ export default function App() {
     setIsReplanFlow(true);
     greetingSent.current = false;
     setLockKey((key) => key + 1);
+    sessionIdRef.current = uid();
     setCurrentPage('lockscreen');
   };
 
-  const handleSavePlan = async () => {
+  const handleSavePlan = async (plan: AgentTravelResponse) => {
     if (loading) return;
-    const replyText = '好的，已经为你保存行程。';
+    const replyText = await callAgentAPI('保存行程', sessionIdRef.current, { action: 'save', plan });
+    const structured = parseAgentPayload(replyText);
+    const responseText = structured ? getAgentResponseText(structured) : replyText;
     const agentId = uid();
     setMessages((prev) => [...prev, { role: 'agent', content: '', id: agentId }]);
-    await streamReply(replyText, agentId);
+    await streamReply(responseText, agentId);
     setStreamingText('');
     setStreamingId(null);
     setMessages((prev) =>
-      prev.map((message) => (message.id === agentId ? { ...message, content: replyText } : message)),
+      prev.map((message) => (message.id === agentId ? { ...message, content: responseText } : message)),
     );
   };
 
