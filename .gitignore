@@ -6,6 +6,8 @@ __MACOSX/
 node_modules/
 dist/
 *.tsbuildinfo
+.venv/
+venv/
 
 .env
 .env.*
@@ -14,3 +16,22 @@ dist/
 .nested_git_backups/
 
 README1.md
+
+# Local agent runs and API responses can contain prompts and location data.
+agent_debug_trace.json
+full_api_response.json
+output.json
+local_data_debug.json
+debug_output.json
+google_map_*_response.json
+bookings.json
+*.log
+
+# Local credential stores, private keys, and security scan reports.
+.aws/
+.ssh/
+credentials.json
+service-account*.json
+*.pem
+*.key
+gitleaks-report*.json

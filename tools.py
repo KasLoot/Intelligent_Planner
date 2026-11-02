@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -20,7 +21,6 @@ TIMEZONE_URL = "https://maps.googleapis.com/maps/api/timezone/json"
 ROUTES_URL = "https://routes.googleapis.com/directions/v2:computeRoutes"
 
 
-API_KEY = __import__("os").environ.get("GOOGLE_MAPS_API_KEY", "")
 SEARCH_FIELD_MASK = (
     "places.displayName,"
     "places.formattedAddress,"
@@ -61,6 +61,13 @@ PRICE_LEVEL_LABELS = {
 }
 
 
+def _google_maps_api_key() -> str:
+    key = os.environ.get("GOOGLE_MAPS_API_KEY", "").strip()
+    if not key:
+        raise RuntimeError("Set GOOGLE_MAPS_API_KEY before calling Google Maps tools.")
+    return key
+
+
 def search_by_text(text_query: str) -> dict:
     payload = {"textQuery": text_query}
     response = requests.post(
@@ -68,7 +75,7 @@ def search_by_text(text_query: str) -> dict:
         json=payload,
         headers={
             "Content-Type": "application/json",
-            "X-Goog-Api-Key": API_KEY,
+            "X-Goog-Api-Key": _google_maps_api_key(),
             "X-Goog-FieldMask": SEARCH_FIELD_MASK,
         },
         timeout=30,
@@ -102,7 +109,7 @@ def search_nearby(
         json=payload,
         headers={
             "Content-Type": "application/json",
-            "X-Goog-Api-Key": API_KEY,
+            "X-Goog-Api-Key": _google_maps_api_key(),
             "X-Goog-FieldMask": SEARCH_FIELD_MASK,
         },
         timeout=30,
@@ -162,7 +169,7 @@ def get_current_location() -> dict:
     }
     response = requests.post(
         GEOLOCATION_URL,
-        params={"key": API_KEY},
+        params={"key": _google_maps_api_key()},
         json=payload,
         headers={"Content-Type": "application/json"},
         timeout=30,
@@ -175,7 +182,7 @@ def get_lat_lng_from_address(address: str) -> dict:
     encoded_address = quote(address, safe="")
     response = requests.get(
         f"{GEOCODE_ADDRESS_URL}/{encoded_address}",
-        headers={"X-Goog-Api-Key": API_KEY},
+        headers={"X-Goog-Api-Key": _google_maps_api_key()},
         timeout=30,
     )
     response.raise_for_status()
@@ -188,7 +195,7 @@ def get_time_zone(latitude: float, longitude: float, timestamp: int) -> dict:
         params={
             "location": f"{latitude},{longitude}",
             "timestamp": timestamp,
-            "key": API_KEY,
+            "key": _google_maps_api_key(),
         },
         timeout=30,
     )
@@ -283,7 +290,7 @@ def compute_route(
         json=payload,
         headers={
             "Content-Type": "application/json",
-            "X-Goog-Api-Key": API_KEY,
+            "X-Goog-Api-Key": _google_maps_api_key(),
             "X-Goog-FieldMask": ROUTES_FIELD_MASK,
         },
         timeout=30,

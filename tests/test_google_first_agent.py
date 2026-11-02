@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import sys
 import tempfile
@@ -24,6 +25,47 @@ class FakeResponse:
 
 
 class GoogleFirstAgentTests(unittest.TestCase):
+    def setUp(self):
+        self.enterContext(
+            patch.dict(os.environ, {"GOOGLE_MAPS_API_KEY": "test-google-maps-key"})
+        )
+
+    def test_google_tools_reject_missing_credentials_without_sending_requests(self):
+        calls = [
+            (tools.search_by_text, ("London",)),
+            (tools.search_nearby, (["restaurant"], 51.5, -0.1)),
+            (tools.get_current_location, ()),
+            (tools.get_lat_lng_from_address, ("London, UK",)),
+            (tools.get_time_zone, (51.5, -0.1, 0)),
+            (
+                tools.compute_route,
+                ("London", "Paris", "address", "TRANSIT"),
+            ),
+        ]
+        for value in (None, "", " \t "):
+            for function, args in calls:
+                with self.subTest(tool=function.__name__, value=value):
+                    with patch.dict(os.environ, {}, clear=True):
+                        if value is not None:
+                            os.environ["GOOGLE_MAPS_API_KEY"] = value
+                        with patch.object(tools.requests, "get") as get:
+                            with patch.object(tools.requests, "post") as post:
+                                with self.assertRaisesRegex(
+                                    RuntimeError, "Set GOOGLE_MAPS_API_KEY"
+                                ):
+                                    function(*args)
+                                get.assert_not_called()
+                                post.assert_not_called()
+
+    def test_google_tools_use_the_current_environment_key(self):
+        with patch.object(
+            tools.requests, "post", return_value=FakeResponse({"places": []})
+        ) as post:
+            for key in ("test-first-key", "test-rotated-key"):
+                with patch.dict(os.environ, {"GOOGLE_MAPS_API_KEY": key}):
+                    tools.search_by_text("London")
+                self.assertEqual(post.call_args.kwargs["headers"]["X-Goog-Api-Key"], key)
+
     def test_tool_config_matches_callable_tools(self):
         configured = {tool["name"] for tool in agent.load_json("configs/tools.json")}
         self.assertEqual(configured, tools.get_available_tool_names())
